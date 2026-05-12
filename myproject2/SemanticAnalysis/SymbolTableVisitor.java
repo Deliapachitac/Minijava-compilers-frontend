@@ -14,10 +14,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     Info current_class;
     MethodInfo current_method;
 
-    public SymbolTableVisitor() {
-        all_classes = new AllClasses();
-        current_class = null;
-    }
+    public SymbolTableVisitor() {}
     
     /**
     * f0 -> "class"
@@ -115,7 +112,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
             if(all_classes.findClass(inheritedname) == null){
                 throw new Exception("Inherited class does not exist" );
             }
-            all_classes.addClass(classname,false , null  );
+            all_classes.addClass(classname,true , inheritedname  );
             current_class = all_classes.findClass(classname);
             n.f3.accept(this, argu);
             n.f4.accept(this, argu);
@@ -180,7 +177,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
         //Method name is extracted 
         String methodname= n.f2.accept(this, argu);
         String returnType= n.f1.accept(this, argu);
-        current_method= new MethodInfo(methodname, returnType)
+        current_method= new MethodInfo(methodname, returnType);
     
         try{
             n.f4.accept(this, argu);
