@@ -45,6 +45,9 @@ public class Info {
         }             
 
         MethodInfo new_method =new MethodInfo(methodName, returnType);
+        for (String[] p: parameters) {
+            new_method.addParameter(p[0], p[1]);
+        }
         methods.add(new_method);
     }
 
