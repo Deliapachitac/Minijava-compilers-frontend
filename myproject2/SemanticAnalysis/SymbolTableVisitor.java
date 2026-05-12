@@ -102,6 +102,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     * f6 -> ( MethodDeclaration() )*
     * f7 -> "}"
     */
+   
     @Override
     public String visit(ClassExtendsDeclaration n, Void argu) throws Exception{ 
          //Class name is extracted 
