@@ -41,7 +41,9 @@ public class ClassInfo {
         return true;
     }
 
-    public boolean addMethod(String methodName, String returnType, LinkedList<String[]> parameters) {
+    // if offset is -1 it means that the method is new or overloaded
+    // if offest>=0 it means that the method is an override and it has the same offset
+    public boolean addMethod(String methodName, String returnType, LinkedList<String[]> parameters,int offest){
        
         LinkedList<MethodInfo> methodList = methods.computeIfAbsent(methodName, k -> new LinkedList<>());
         LinkedList<String> parameterTypes = getTypes(parameters);
@@ -51,18 +53,23 @@ public class ClassInfo {
                 return false; // method with same name and parameter types already exists
             }
         }
+
+        int myoffset;
+        if(offest==-1){//new method or overloaded
+            myoffset = methodOffset;
+            methodOffset += 8;
+
+        }else{//override
+            myoffset = offest;
+        }
         
-        MethodInfo newMethod = new MethodInfo(methodName, returnType, methodOffset);
+        MethodInfo newMethod = new MethodInfo(methodName, returnType, myoffset);
+        for (String[] p: parameters) {
+            newMethod.addParameter(p[0], p[1]);
+        }
         methodList.add(newMethod);
-        methodOffset += 8;
         return true;
 
-    }
-
-    public boolean addOverriddenMethod(String methodName, String returnType, LinkedList<String[]> parameters,int offset ) {
-        
-        
-        return true;
     }
 
     
