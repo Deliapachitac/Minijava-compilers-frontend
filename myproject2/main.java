@@ -24,7 +24,10 @@ public class main {
                 // Create a parser for the input file and parse it to get the root of the syntax tree
                 MiniJavaParser myparser =new  MiniJavaParser(fin);
                 Goal root= myparser.Goal();
+
+                //build the new symbol table
                 AllClasses all_classes = new AllClasses();
+                
                 SymbolTableVisitor root_visitor = new SymbolTableVisitor();
                 root.accept(root_visitor, all_classes);
 

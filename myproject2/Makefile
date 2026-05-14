@@ -4,7 +4,7 @@ all: compile
 compile:
 	java -jar lib/jtb133di.jar -te lib/minijava.jj
 	java -jar lib/javacc5.jar lib/minijava-jtb.jj
-	javac -cp . MySymbolTable/Info.java MySymbolTable/MethodInfo.java MySymbolTable/AllClasses.java SemanticAnalysis/SymbolTableVisitor.java main.java
+	javac -cp . MySymbolTable/*.java SemanticAnalysis/*.java main.java
 
 run:
 	java -cp . main $(FILE)

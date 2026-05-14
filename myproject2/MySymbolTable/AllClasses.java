@@ -112,6 +112,8 @@ public class AllClasses {
     }
 
     
-
+    public void clearLocals(){
+        this.localvar.clear();
+    }
 
 }

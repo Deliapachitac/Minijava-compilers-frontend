@@ -2,15 +2,11 @@ package SemanticAnalysis;
 import visitor.GJDepthFirst;
 import syntaxtree.*;
 import MySymbolTable.*;
+import java.util.*;
 
 
 public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     
-    AllClasses all_classes;
-    ClassInfo current_class;
-    MethodInfo current_method;
-
-    public SymbolTableVisitor() {}
     
     /**
     * f0 -> "class"
@@ -40,18 +36,14 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         String classname= n.f1.accept(this, argu);
 
         //
-        try{
-            all_classes.addClass(classname,false , null  );
-            current_class = all_classes.findClass(classname);
-            n.f11.accept(this, argu);
-            n.f14.accept(this, argu);
-            n.f15.accept(this, argu);
-            
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;
+         //
+        if(!argu.addClass(classname, null)) {
+            throw new Exception("Class already exists");
         }
-        current_class=null;
+           
+        n.f14.accept(this,argu);
+       
+       
         return null;
     }
 
@@ -70,18 +62,13 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
 
-        //
-        try{
-            all_classes.addClass(classname,false , null  );
-            current_class = all_classes.findClass(classname);
-            n.f3.accept(this, argu);
-            n.f4.accept(this, argu);
-            
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;
+         //
+        if(!argu.addClass(classname, null)) {
+            throw new Exception("Class already exists");
         }
-        current_class=null;
+
+        n.f3.accept(this, argu);// fields
+        n.f4.accept(this, argu);// methods
         return null;
 
     }
@@ -103,22 +90,15 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     public String visit(ClassExtendsDeclaration n, AllClasses argu) throws Exception{ 
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
-        String inheritedname= n.f3.accept(this, argu);
+        String parentname= n.f3.accept(this, argu);
+        
         //
-        try{
-            if(all_classes.findClass(inheritedname) == null){
-                throw new Exception("Inherited class does not exist" );
-            }
-            all_classes.addClass(classname,true , inheritedname  );
-            current_class = all_classes.findClass(classname);
-            n.f3.accept(this, argu);
-            n.f4.accept(this, argu);
-            
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;
+        if(!argu.addClass(classname, parentname)) {
+            throw new Exception("Class already exists");
         }
-        current_class=null;
+
+        n.f5.accept(this, argu);// fields
+        n.f6.accept(this, argu);// methods
         return null;
 
     }
@@ -136,18 +116,19 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         String type= n.f0.accept(this, argu);
         String classname= n.f1.accept(this, argu);
 
-        //
-        try{
-            if(current_method!=null){
-                current_method.addLocalVariable(type, classname);
+        //if we are in a method we add local variable
+        //otherwise we add field to the current class
+        if(argu.getCurrentClass()!=null 
+            && argu.getTypeVariable(classname)!=null
+            && argu.isSubClass(argu.getCurrentClass(), argu.getCurrentClass())) {
+                
+                if(!argu.addLocalVar(classname, type)) { // the function returns false if the variable already exists
+                    throw new Exception("Variable already exists in local scope");
+                }
+        }else{
+            if (!argu.getCurrentClass().addField(type, classname)) {
+                throw new Exception("Field already exists in class");
             }
-            else  {
-                current_class.addVariable(type, classname);
-            }
-            
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;
         }
         return null;
     }
@@ -174,61 +155,53 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         //Method name is extracted 
         String methodname= n.f2.accept(this, argu);
         String returnType= n.f1.accept(this, argu);
-        current_method= new MethodInfo(methodname, returnType);
-    
-        try{
-            n.f4.accept(this, argu);
-            current_class.addMethod(methodname, returnType, current_method.parameters);
-            n.f7.accept(this, argu);
-            n.f8.accept(this, argu);
+        
+        //Collecting the parameters of the method in a linked list  
+        LinkedList<String[]> myparametres= new LinkedList<>() ;
+        if (n.f4.present()) {
+            FormalParameterList paramList =(FormalParameterList) n.f4.node;
             
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;
+            myparametres.add(new String[]{paramList.f0.accept(this, argu), paramList.f1.accept(this, argu)});
+
+            for(Node node:paramList.f1.f0.nodes) {
+                FormalParameterTerm paramTerm = (FormalParameterTerm) node;
+                myparametres.add(new String[]{paramTerm.f1.f0.accept(this, argu), paramTerm.f1.f1.accept(this, argu)});
+            }
+            
         }
-        current_method= null;
-        return null;
-    }
-
-    /**
-    * f0 -> FormalParameter()
-    * f1 -> FormalParameterTail()
-    */
-
-    @Override
-    public String  visit(FormalParameterList n,AllClasses argu) throws  Exception {     
-        n.f0.accept(this, argu);
-        n.f1.accept(this, argu);
-        return null;
-    }
-    /**
-    * f0 -> Type()
-    * f1 -> Identifier()
-    */
-
-    @Override
-    public String visit(FormalParameter n, AllClasses argu) throws Exception{
-        String type = n.f0.accept(this, argu);
-        String parameterName = n.f1.accept(this, argu);
-        try{
-            current_method.addParameter(type, parameterName);
-        }catch(Exception e){
-            System.err.println(e.getMessage());
-            throw e;    
+        
+        //
+        LinkedList<String> paramTypes = new LinkedList<>();
+        for(String[] p: myparametres) {
+           
+            paramTypes.add(p[0]);
         }
+
+        MethodInfo parentmethod = argu.findMethod(argu.getCurrentClass().getParentClass(), methodname, paramTypes);
+        int myoffset;
+        if(parentmethod!=null) {
+            myoffset = parentmethod.getOffset();
+        }else {
+            myoffset = -1;
+        }
+
+        //
+        if (!argu.getCurrentClass().addMethod(methodname, returnType, myparametres, myoffset)) {
+            throw new Exception("Method already exists in class");
+        }
+
+        argu.clearLocals();
+        for(String[] p: myparametres) {
+            if(!argu.addLocalVar(p[1], p[0])) { // the function returns false if the variable already exists
+                throw new Exception("Variable already exists in local scope");
+            }
+        }
+
+        n.f7.accept(this,argu);
         return null;
     }
 
-    /**
-    * f0 -> ","
-    * f1 -> FormalParameter()
-    */
-
-    @Override
-    public String visit(FormalParameterTerm n,AllClasses  argu)throws  Exception{
-        return n.f1.accept(this, argu);
-
-    }
+    
 
     //types
     @Override
