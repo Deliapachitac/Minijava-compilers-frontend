@@ -1,56 +1,54 @@
 package MySymbolTable;
 import java.util.LinkedList;
 
+
+
+/* Information about a method in a class*/
 public class MethodInfo {
-    public String name;
-    public String returnType;
-    public LinkedList<String[]> parameters; // list of parameters [type, name]
-    public LinkedList<String[]> localVariables; // list of local variables [type, name]
+    private String name;
+    private String returnType;
+    private LinkedList<String[]> parameters; // list of parameters [type, name]
+    private int offset; 
 
-    public MethodInfo(String name, String returnType) {
-        this.name = name;
-        this.returnType = returnType;
 
-        parameters = new LinkedList<String[]>();
-        localVariables = new LinkedList<String[]>();
-        
+    public MethodInfo(String name, String returnType, int offset) {
+        this.name= name;
+        this.returnType= returnType;
+        this.offset = offset;
+        this.parameters = new LinkedList<>();
+
     }
 
-    public void addParameter(String type, String parameterName)throws Exception{
-        // Check if the parameter already exists in the current method
-        for (String[] current : parameters) {
-            if (current[1].equals(parameterName)) {
-                throw new Exception("Parameter already exists" );
-              
-            }
-        }         
+    public void addParameter(String type, String parameterName){
+                     
+        String[] new_parameter= new String[]{type, parameterName} ;
+        this.parameters.add(new_parameter);
+    }    
 
-        String[] new_parameter = new String[]{type, parameterName};
-        parameters.add(new_parameter);
+    public String getName(){
+        return  name;
+    }  
+
+    public String getReturnType() {
+        return returnType;
     }
 
-    public void addLocalVariable(String type, String variableName)throws Exception {
-        // Check if the local variable already exists in the current method
-        for (String[] current : localVariables) {
-            if (current[1].equals(variableName)) {
-                throw new Exception("Local variable already exists" );
-                
-            }
-        }         
-
-        String[] new_local_variable = new String[]{type, variableName};
-        localVariables.add(new_local_variable);
+    public LinkedList<String[]> getParameters() {
+        return parameters;
     }
 
-    
-    public static String getKey(String name, LinkedList<String[]> parameters) {
-        String key= new String(name);
-        for (String[] p: parameters) {
-            key += "_" + p[0]; 
+    public int getOffset() {
+        return offset;
+    }
+
+    //Helpful function for returning only the types of the parameters
+    public LinkedList<String> getParameterTypes() {
+        LinkedList<String> parameterTypes = new LinkedList<>();
+        for (String[] parameter : parameters) {
+            parameterTypes.add(parameter[0]);
         }
-        return key;
+        return parameterTypes;
     }
-    public String getKey(){
-        return getKey(this.name,this.parameters);
-    }      
+
+
 }

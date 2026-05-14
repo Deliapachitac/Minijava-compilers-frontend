@@ -1,33 +1,23 @@
 package MySymbolTable;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
+
 
 public class AllClasses {
-    LinkedList<Info> classes;
+    
+    private LinkedHashMap<String, ClassInfo> classes;
+
+    // This are helpful variables that are set by visitors to keep track od the current position on the AST  
+    private ClassInfo currentClass;
+    private String currentMethod;
+    private LinkedHashMap<String, String>localvar ;
 
     public AllClasses() {
-        classes = new LinkedList<Info>();
+        this.classes = new LinkedHashMap<String, ClassInfo>();
+        this.localvar = new LinkedHashMap<String, String>();
+
     }
 
-    public void addClass(String name, boolean inherited, String inherited_name)   throws Exception  {
-        
-        // Check if the class already exists
-        if(findClass(name)!= null){
-            throw new Exception("Class already exists") ;      
-        }
 
-        Info new_class =new Info(name, inherited, inherited_name);
-        classes.add(new_class);
-    }   
-           
-    public Info findClass(String name){          
-        for (Info current:classes) {
-            if (current.name.equals( name )){
-                return  current; 
-            }   
-        }    
-        return  null;
-    }
 
-    
 
 }

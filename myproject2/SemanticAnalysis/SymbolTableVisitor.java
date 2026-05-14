@@ -3,15 +3,11 @@ import visitor.GJDepthFirst;
 import syntaxtree.*;
 import MySymbolTable.*;
 
-import java.lang.reflect.Method;
-import java.util.LinkedList;
 
-
-
-public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
+public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     
     AllClasses all_classes;
-    Info current_class;
+    ClassInfo current_class;
     MethodInfo current_method;
 
     public SymbolTableVisitor() {}
@@ -38,7 +34,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
     
     @Override
-    public String visit(MainClass n, Void argu) throws Exception{
+    public String visit(MainClass n, AllClasses argu) throws Exception{
 
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
@@ -69,7 +65,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String visit(ClassDeclaration n, Void argu) throws Exception{
+    public String visit(ClassDeclaration n, AllClasses argu) throws Exception{
 
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
@@ -104,7 +100,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
    
     @Override
-    public String visit(ClassExtendsDeclaration n, Void argu) throws Exception{ 
+    public String visit(ClassExtendsDeclaration n, AllClasses argu) throws Exception{ 
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
         String inheritedname= n.f3.accept(this, argu);
@@ -134,7 +130,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String visit(VarDeclaration n, Void argu) throws Exception{
+    public String visit(VarDeclaration n, AllClasses argu) throws Exception{
         
         //Class name is extracted 
         String type= n.f0.accept(this, argu);
@@ -173,7 +169,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String visit(MethodDeclaration n, Void argu) throws Exception{
+    public String visit(MethodDeclaration n, AllClasses argu) throws Exception{
 
         //Method name is extracted 
         String methodname= n.f2.accept(this, argu);
@@ -200,7 +196,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String  visit(FormalParameterList n,Void argu) throws  Exception {     
+    public String  visit(FormalParameterList n,AllClasses argu) throws  Exception {     
         n.f0.accept(this, argu);
         n.f1.accept(this, argu);
         return null;
@@ -211,7 +207,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String visit(FormalParameter n, Void argu) throws Exception{
+    public String visit(FormalParameter n, AllClasses argu) throws Exception{
         String type = n.f0.accept(this, argu);
         String parameterName = n.f1.accept(this, argu);
         try{
@@ -229,29 +225,29 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,Void>{
     */
 
     @Override
-    public String visit(FormalParameterTerm n,Void  argu)throws  Exception{
+    public String visit(FormalParameterTerm n,AllClasses  argu)throws  Exception{
         return n.f1.accept(this, argu);
 
     }
 
     //types
     @Override
-    public String visit(IntegerType n, Void argu) {
+    public String visit(IntegerType n, AllClasses argu) {
         return  "int";     
     }
 
     @Override
-    public String visit(BooleanType n, Void argu) {
+    public String visit(BooleanType n, AllClasses argu) {
         return "boolean" ;
     }
 
     @Override
-    public String visit(ArrayType n, Void argu) {
+    public String visit(ArrayType n, AllClasses argu) {
         return "int[]";
     }
 
     @Override
-    public String visit(Identifier n, Void argu) {
+    public String visit(Identifier n, AllClasses argu) {
         return n.f0.toString(); 
     }
 
