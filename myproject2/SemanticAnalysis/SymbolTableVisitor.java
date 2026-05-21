@@ -35,12 +35,15 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
 
+        System.out.println("\n----------------------------------------");
+        System.out.println("Processing main class " + classname);
+
         //
-         //
         if(!argu.addClass(classname, null)) {
             throw new Exception("Class already exists");
         }
            
+
         n.f14.accept(this,argu);
        
        
@@ -61,14 +64,17 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
 
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
-
-         //
+        System.out.println("\nClass   " + classname+"  {");
+        
+        //
         if(!argu.addClass(classname, null)) {
             throw new Exception("Class already exists");
         }
 
         n.f3.accept(this, argu);// fields
         n.f4.accept(this, argu);// methods
+
+        System.out.println("}");
         return null;
 
     }
@@ -91,6 +97,8 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
          //Class name is extracted 
         String classname= n.f1.accept(this, argu);
         String parentname= n.f3.accept(this, argu);
+
+        System.out.println("\nClass  " + classname + "  extends " + parentname + " {" );
         
         //
         if(!argu.addClass(classname, parentname)) {
@@ -99,6 +107,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
 
         n.f5.accept(this, argu);// fields
         n.f6.accept(this, argu);// methods
+        System.out.println("}");
         return null;
 
     }
@@ -122,10 +131,14 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             && argu.getTypeVariable(classname)!=null
             && argu.isSubClass(argu.getCurrentClass(), argu.getCurrentClass())) {
                 
+                System.out.println("    Variable:  " + classname + " of type " + type );
+
                 if(!argu.addLocalVar(classname, type)) { // the function returns false if the variable already exists
+                   
                     throw new Exception("Variable already exists in local scope");
                 }
         }else{
+            System.out.println("    Field:  " + classname + " of type " + type );
             if (!argu.getCurrentClass().addField(type, classname)) {
                 throw new Exception("Field already exists in class");
             }
@@ -185,6 +198,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             myoffset = -1;
         }
 
+        System.out.println("    Method: " + returnType + " " + methodname  + "(" + paramTypes.toString() + ") ");
         //
         if (!argu.getCurrentClass().addMethod(methodname, returnType, myparametres, myoffset)) {
             throw new Exception("Method already exists in class");
