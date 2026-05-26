@@ -35,6 +35,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
+
+        System.out.println("Type checking main class " + classname);
         
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
@@ -62,6 +64,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
+
+        System.out.println("Type checking class " + classname);
         
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
@@ -93,7 +97,10 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
-        
+        String parentname= n.f3.accept(this, argu);
+
+        System.out.println("Type checking class " + classname +"extends " + parentname);
+
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
         
@@ -136,10 +143,14 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
     @Override
     public String visit(MethodDeclaration n, AllClasses argu) throws Exception{
+       //Method name and return type are extracted  
+        String returnType= n.f1.accept(this, argu);
+        String methodname= n.f2.accept(this, argu);
 
+        System.out.println("Type checking method " + methodname + " with return type " + returnType);
         argu.clearLocals(); // clear any local variables from previous methods
         
-        //
+        
         if(n.f4.present()) {
             
             FormalParameterList paramList =(FormalParameterList) n.f4.node;
@@ -147,6 +158,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             //We extract the first parameter of the method and save it in the list of parameters of the method
             String mytype= paramList.f0.f0.accept(this, argu);
             String myname= paramList.f0.f1.accept(this, argu);
+            System.out.println("    Parameter: " + mytype + " " + myname);
             argu.addLocalVar(myname, mytype); // add the first parameter to the local variables of the method
 
             // For each
@@ -155,6 +167,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
                 
                 mytype= paramTerm.f1.f0.accept(this, argu);
                 myname= paramTerm.f1.f1.accept(this, argu);
+                System.out.println("    Parameter: " + mytype + " " + myname);
                 argu.addLocalVar(myname, mytype); // add the parameter to the local variables of the method
             }
 
@@ -198,6 +211,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             }
         }
 
+        System.out.println("Type checking while statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
             throw new Exception("Condition  of while statement must be of type boolean");
         }
@@ -232,6 +246,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             }
         }
 
+        System.out.println("Type checking if statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
             throw new Exception("Condition  of if statement must be of type boolean");
         }
@@ -266,6 +281,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             }
         }
 
+        System.out.println("Type checking print statement with expression type: " + type_condition);
         if(!type_condition.equals("int")) {
             throw new Exception("Println statement only prints integers");
         }
@@ -275,7 +291,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
   
     // for identifiers we return the name of the identifier(class name, variable name, method name, etc.)
-    @Override
+    @Override  
     public String visit(Identifier n, AllClasses argu) {
         return n.f0.toString(); 
     }
@@ -285,12 +301,10 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     public String visit(IntegerType n, AllClasses argu) {
         return  "int";     
     }
-
     @Override
     public String visit(BooleanType n, AllClasses argu) {
         return "boolean" ;
     }
-
     @Override
     public String visit(ArrayType n, AllClasses argu) {
         return "int[]";
@@ -311,10 +325,127 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     }
     @Override
     public String visit(ThisExpression n ,AllClasses argu){
-        return argu.getCurrentClass().getName();  
+        return argu.getCurrentClass().getName();   
     }
 
+    //********************Arithmetic and Logical Expressions*****************//
+
+    /**
+    * f0 -> Clause()
+    * f1 -> "&&"
+    * f2 -> Clause()
+    */
+   public String visit(AndExpression n, AllClasses argu) throws Exception {
+      
+        return null ;
+   }
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "<"
+    * f2 -> PrimaryExpression()
+    */
+   public String visit(CompareExpression n, AllClasses argu) throws Exception {
+     
+      return null;
+   }
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "+"
+    * f2 -> PrimaryExpression()
+    */
+   public String visit(PlusExpression n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "-"
+    * f2 -> PrimaryExpression()
+    */
+   public String visit(MinusExpression n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "*"
+    * f2 -> PrimaryExpression()
+    */
+   public String visit(TimesExpression n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
+
+    /**
+    * f0 -> "!"
+    * f1 -> Clause()
+    */
+   public String visit(NotExpression n, AllClasses argu) throws Exception {
+     
+      return null;
+   }
+
+   /**
+    * f0 -> "("
+    * f1 -> Expression()
+    * f2 -> ")"
+    */
+   public String visit(BracketExpression n, AllClasses argu) throws Exception {
+      return null;
+   }
 
 
+   //******************* Array operations checking *****************//
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "."
+    * f2 -> "length"
+    */
+   public String visit(ArrayLength n, AllClasses argu) throws Exception {
+      return null;
+   }
+   
+   /**
+    * f0 -> "new"
+    * f1 -> "int"
+    * f2 -> "["
+    * f3 -> Expression()
+    * f4 -> "]"
+    */
+   public String visit(ArrayAllocationExpression n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "["
+    * f2 -> PrimaryExpression()
+    * f3 -> "]"
+    */
+   public String visit(ArrayLookup n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
+
+   /**
+    * f0 -> Identifier()
+    * f1 -> "["
+    * f2 -> Expression()
+    * f3 -> "]"
+    * f4 -> "="
+    * f5 -> Expression()
+    * f6 -> ";"
+    */
+   public String visit(ArrayAssignmentStatement n, AllClasses argu) throws Exception {
+      
+      return null;
+   }
 
 }
+   

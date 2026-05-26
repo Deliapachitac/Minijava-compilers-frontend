@@ -31,6 +31,11 @@ public class main {
                 SymbolTableVisitor root_visitor = new SymbolTableVisitor();
                 root.accept(root_visitor, all_classes);
 
+                //type checking
+                TypeChecking type_checking_visitor = new TypeChecking();
+                root.accept(type_checking_visitor, all_classes);    
+
+                
 
             } catch (Exception e) {
                 System.err.println("Semantic analysis failed for " + fileName);

@@ -182,8 +182,9 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     public String visit(MethodDeclaration n, AllClasses argu) throws Exception{
 
         //Method name and return type are extracted  
-        String methodname= n.f2.accept(this, argu);
         String returnType= n.f1.accept(this, argu);
+        String methodname= n.f2.accept(this, argu);
+        
         
         //Collecting the parameters of the method in a linked list  
         LinkedList<String[]> myparametres= new LinkedList<>() ;
