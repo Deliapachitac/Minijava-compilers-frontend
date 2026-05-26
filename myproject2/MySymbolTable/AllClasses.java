@@ -41,14 +41,14 @@ public class AllClasses {
         currentClass = classes.get(name);
     }
 
-    public ClassInfo getCurrentClass() {
+    public ClassInfo  getCurrentClass() {
         return currentClass;
     }
     public LinkedHashMap<String, ClassInfo> getClasses() {
         return classes;
     }
 
-    public boolean addLocalVar(String name, String type) {
+    public boolean addLocalVar(String name, String type){
         if (localvar.containsKey(name)) {
             return false; 
         }

@@ -1,4 +1,4 @@
-FILE=tests/test06.java
+FILE=tests/LinkedList.java
 all: compile
 
 compile:

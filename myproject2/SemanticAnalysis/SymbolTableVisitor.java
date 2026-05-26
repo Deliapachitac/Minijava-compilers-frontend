@@ -7,7 +7,8 @@ import java.util.*;
 
 public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     
-    
+    private boolean inMethod = false; //this is flag to check if we are currently visiting a method or not  (is variable or field to the class )
+   
     /**
     * f0 -> "class"
     * f1 -> Identifier()
@@ -43,9 +44,10 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Class already exists");
         }
            
-
+        inMethod = true;
+        argu.clearLocals();
         n.f14.accept(this,argu);
-       
+        inMethod = false;
        
         return null;
     }
@@ -62,7 +64,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     @Override
     public String visit(ClassDeclaration n, AllClasses argu) throws Exception{
 
-         //Class name is extracted 
+         //Class name is extracted and printed
         String classname= n.f1.accept(this, argu);
         System.out.println("\nClass   " + classname+"  {");
         
@@ -71,6 +73,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Class already exists");
         }
 
+        inMethod = false;
         n.f3.accept(this, argu);// fields
         n.f4.accept(this, argu);// methods
 
@@ -94,7 +97,8 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
    
     @Override
     public String visit(ClassExtendsDeclaration n, AllClasses argu) throws Exception{ 
-         //Class name is extracted 
+        
+        //Class name and parent name are extracted and printed
         String classname= n.f1.accept(this, argu);
         String parentname= n.f3.accept(this, argu);
 
@@ -105,6 +109,7 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Class already exists");
         }
 
+        inMethod = false;
         n.f5.accept(this, argu);// fields
         n.f6.accept(this, argu);// methods
         System.out.println("}");
@@ -123,23 +128,21 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         
         //Class name is extracted 
         String type= n.f0.accept(this, argu);
-        String classname= n.f1.accept(this, argu);
+        String field_variable_name= n.f1.accept(this, argu);
 
         //if we are in a method we add local variable
         //otherwise we add field to the current class
-        if(argu.getCurrentClass()!=null 
-            && argu.getTypeVariable(classname)!=null
-            && argu.isSubClass(argu.getCurrentClass(), argu.getCurrentClass())) {
-                
-                System.out.println("    Variable:  " + classname + " of type " + type );
+        if(inMethod) {
+            
+            System.out.println("       Variable:  " + field_variable_name + " of type " + type );
 
-                if(!argu.addLocalVar(classname, type)) { // the function returns false if the variable already exists
-                   
-                    throw new Exception("Variable already exists in local scope");
-                }
+            if(!argu.addLocalVar(field_variable_name, type)) { // the function returns false if the variable already exists
+                
+                throw new Exception("Variable already exists in local scope");
+            }
         }else{
-            System.out.println("    Field:  " + classname + " of type " + type );
-            if (!argu.getCurrentClass().addField(type, classname)) {
+            System.out.println("    Field:  " + field_variable_name + " of type " + type );
+            if (!argu.getCurrentClass().addField(type, field_variable_name)) {
                 throw new Exception("Field already exists in class");
             }
         }
@@ -174,11 +177,20 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         if (n.f4.present()) {
             FormalParameterList paramList =(FormalParameterList) n.f4.node;
             
-            myparametres.add(new String[]{paramList.f0.accept(this, argu), paramList.f1.accept(this, argu)});
+            
+            String mytype= paramList.f0.f0.accept(this, argu);
+            String myname= paramList.f0.f1.accept(this, argu);
+            String[] myparam =new String[]{mytype, myname}; 
+            myparametres.add(myparam);
 
-            for(Node node:paramList.f1.f0.nodes) {
+
+            for(Node node :paramList.f1.f0.nodes) {
                 FormalParameterTerm paramTerm = (FormalParameterTerm) node;
-                myparametres.add(new String[]{paramTerm.f1.f0.accept(this, argu), paramTerm.f1.f1.accept(this, argu)});
+                
+                mytype= paramTerm.f1.f0.accept(this, argu);
+                myname= paramTerm.f1.f1.accept(this, argu);
+                myparam =new String[]{mytype, myname}; 
+                myparametres.add(myparam);
             }
             
         }
@@ -204,7 +216,9 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Method already exists in class");
         }
 
+        inMethod= true;
         argu.clearLocals();
+
         for(String[] p: myparametres) {
             if(!argu.addLocalVar(p[1], p[0])) { // the function returns false if the variable already exists
                 throw new Exception("Variable already exists in local scope");
@@ -212,6 +226,8 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         }
 
         n.f7.accept(this,argu);
+
+        inMethod = false;
         return null;
     }
 
