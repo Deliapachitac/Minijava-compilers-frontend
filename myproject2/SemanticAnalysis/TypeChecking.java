@@ -336,8 +336,41 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> Clause()
     */
    public String visit(AndExpression n, AllClasses argu) throws Exception {
-      
-        return null ;
+        String left= n.f0.accept(this, argu);
+        String right= n.f2.accept(this, argu);
+
+        String type_left="";
+        String type_right="";
+
+
+        if(left !=null ){
+            String temp= argu.getTypeVariable(left);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_left= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_left=left;
+            }
+        }
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("boolean") || !type_left.equals("boolean") ) {
+            throw new Exception("Both operands of && must be of type boolean");
+        }
+
+        return null;
    }
 
    /**
@@ -346,8 +379,42 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> PrimaryExpression()
     */
    public String visit(CompareExpression n, AllClasses argu) throws Exception {
+        String left= n.f0.accept(this, argu);
+        String right= n.f2.accept(this, argu);
+
+        String type_left="";
+        String type_right="";
+
+
+        if(left !=null ){
+            String temp= argu.getTypeVariable(left);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_left= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_left=left;
+            }
+        }
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("int") || !type_left.equals("int") ) {
+            throw new Exception("Both operands of < must be of type int");
+        }
+
+        return null;
      
-      return null;
    }
 
    /**
@@ -356,8 +423,41 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> PrimaryExpression()
     */
    public String visit(PlusExpression n, AllClasses argu) throws Exception {
-      
-      return null;
+        String left= n.f0.accept(this, argu);
+        String right= n.f2.accept(this, argu);
+
+        String type_left="";
+        String type_right="";
+
+
+        if(left !=null ){
+            String temp= argu.getTypeVariable(left);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_left= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_left=left;
+            }
+        }
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("int") || !type_left.equals("int") ) {
+            throw new Exception("Both operands of + must be of type int");
+        }
+
+        return null;
    }
 
    /**
@@ -366,8 +466,41 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> PrimaryExpression()
     */
    public String visit(MinusExpression n, AllClasses argu) throws Exception {
-      
-      return null;
+        String left= n.f0.accept(this, argu);
+        String right= n.f2.accept(this ,argu);
+
+        String type_left="";   
+        String type_right="";
+
+
+        if(left !=null ){
+            String temp= argu.getTypeVariable(left);
+            if(temp!= null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_left= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_left=left;
+            }
+        }
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp !=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("int")|| !type_left.equals("int") ) {
+            throw new Exception("Both operands of + must be of type int");
+        }
+
+        return null;
    }
 
    /**
@@ -376,8 +509,41 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> PrimaryExpression()
     */
    public String visit(TimesExpression n, AllClasses argu) throws Exception {
-      
-      return null;
+        String left= n.f0.accept(this, argu);
+        String right= n.f2.accept(this, argu);
+
+        String type_left="";
+        String type_right="";
+
+
+        if(left !=null ){
+            String temp= argu.getTypeVariable(left);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_left= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_left=left;
+            }
+        }
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("int") || !type_left.equals("int") ) {
+            throw new Exception("Both operands of + must be of type int");
+        }
+
+        return null;
    }
 
     /**
@@ -385,8 +551,27 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> Clause()
     */
    public String visit(NotExpression n, AllClasses argu) throws Exception {
-     
-      return null;
+       
+        String right= n.f1.accept(this, argu);
+        String type_right="";
+
+        if(right !=null ){
+            String temp= argu.getTypeVariable(right);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_right= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_right=right;
+            }
+        }
+
+
+        if(!type_right.equals("boolean")  ) {
+            throw new Exception("Both operands of ! must be of type boolean");
+        }
+
+        return null;
    }
 
    /**
@@ -395,7 +580,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> ")"
     */
    public String visit(BracketExpression n, AllClasses argu) throws Exception {
-      return null;
+        return n.f1.accept(this, argu);
    }
 
 
@@ -407,7 +592,26 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> "length"
     */
    public String visit(ArrayLength n, AllClasses argu) throws Exception {
-      return null;
+        String expr= n.f0.accept(this, argu);
+        String type_expr="" ;
+
+        if(expr !=null ){
+            String temp= argu.getTypeVariable(expr);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_expr= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_expr=expr;
+            }
+        }
+
+
+        if(!type_expr.equals("int[]")  ) {
+            throw new Exception("The .lenght operator can only be applied to int[]");
+        }
+
+        return null;
    }
    
    /**
@@ -418,8 +622,26 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f4 -> "]"
     */
    public String visit(ArrayAllocationExpression n, AllClasses argu) throws Exception {
-      
-      return null;
+        String expr= n.f3.accept(this, argu);
+        String type_expr="";
+
+        if(expr !=null ){
+            String temp= argu.getTypeVariable(expr);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_expr= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_expr=expr;
+            }
+        }
+
+
+        if(!type_expr.equals("int")  ) {
+            throw new Exception("Array allocation must be have  integer size");
+        }
+
+        return null;
    }
 
    /**
@@ -429,8 +651,41 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f3 -> "]"
     */
    public String visit(ArrayLookup n, AllClasses argu) throws Exception {
-      
-      return null;
+        String myarray= n.f0.accept(this, argu);
+        String myindex= n.f2.accept(this, argu);
+
+        String type_array="";
+        String type_index="";
+
+
+        if(myarray !=null ){
+            String temp= argu.getTypeVariable(myarray);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_array= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_array=myarray;
+            }
+        }
+
+        if(myindex !=null ){
+            String temp= argu.getTypeVariable(myindex);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_index= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_index=myindex;
+            }
+        }
+
+
+        if(!type_index.equals("int") || !type_array.equals("int[]") ) {
+            throw new Exception("TThe index of an array must be of type int and the array must be of type int[]");
+        }
+
+        return null;
    }
 
    /**
@@ -443,9 +698,64 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f6 -> ";"
     */
    public String visit(ArrayAssignmentStatement n, AllClasses argu) throws Exception {
-      
-      return null;
+        
+        String myarray= n.f0.accept(this, argu);
+        String myindex= n.f2.accept(this, argu);
+        String myvalue = n.f5.accept(this, argu);
+
+
+        String type_array="";
+        String type_index="";
+        String type_value="";
+
+        if(myarray !=null ){
+            String temp= argu.getTypeVariable(myarray);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_array= temp;
+            }else{
+                //if the variable wasnt found then the left is already the type 
+                type_array=myarray;
+            }
+        }
+
+        if(myindex !=null ){
+            String temp= argu.getTypeVariable(myindex);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_index= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_index=myindex;
+            }
+        }
+
+        if(myvalue !=null ){
+            String temp= argu.getTypeVariable(myvalue);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_value= temp;
+            } else{
+                //if the variable wasnt found then the right is already the type 
+                type_value=myvalue;
+            }
+        }
+
+        if(!type_index.equals("int") || !type_array.equals("int[]")) {
+            throw new Exception("TThe index of an array must be of type int and the array must be of type int[]");
+        }
+
+        if(!type_value.equals("int")) {
+            throw new Exception("The value assigned to an array element must be of type int");
+        }
+
+        return null;
    }
+
+
+
+
+
 
 }
    
