@@ -116,4 +116,8 @@ public class AllClasses {
         this.localvar.clear();
     }
 
+    public ClassInfo getClassInfoByName(String name) {
+        return this.classes.get(name);
+    }
+
 }

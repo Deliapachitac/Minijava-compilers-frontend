@@ -178,7 +178,25 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         n.f7.accept(this, argu); // var declarations of the method
         n.f8.accept(this, argu); // this will visit the statements of the method (if,while,print,...)
 
-        /////////
+        //Checking the return type of the method
+        String return_expr_type= n.f10.accept(this, argu);
+        String type_return_expr="";
+
+        if(return_expr_type !=null ){
+            String temp= argu.getTypeVariable(return_expr_type);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_return_expr= temp;
+            }else{
+                //if the variable wasnt found then the return_expr_type is already the type 
+                type_return_expr=return_expr_type;
+            }
+        }
+
+        if(!type_return_expr.equals(returnType)) {
+            throw new Exception("The type of the return " + type_return_expr + " doesnt match with the declared return type  " + returnType);
+        }
+
 
 
         return null;
@@ -194,7 +212,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f3 -> ")"
     * f4 -> Statement()
     */
-
+    @Override  
    public String visit(WhileStatement n, AllClasses argu) throws Exception {
        //We take the result of f2 (ex: "Element", "int")
         String raw_type = n.f2.accept(this, argu);
@@ -229,6 +247,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f5 -> "else"
     * f6 -> Statement()
     */
+   @Override  
    public String visit(IfStatement n, AllClasses argu) throws Exception {
         //We take the result of f2 (ex: "Element", "int")
         String raw_type = n.f2.accept(this, argu);
@@ -264,6 +283,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f3 -> ")"
     * f4 -> ";"
     */
+   @Override  
    public String visit(PrintStatement n, AllClasses argu) throws Exception {
         
         //We take the result of f2 (ex: "Element", "int")
@@ -335,6 +355,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "&&"
     * f2 -> Clause()
     */
+   @Override  
    public String visit(AndExpression n, AllClasses argu) throws Exception {
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
@@ -370,7 +391,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of && must be of type boolean");
         }
 
-        return null;
+        return "boolean";
    }
 
    /**
@@ -378,6 +399,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "<"
     * f2 -> PrimaryExpression()
     */
+   @Override  
    public String visit(CompareExpression n, AllClasses argu) throws Exception {
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
@@ -413,7 +435,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of < must be of type int");
         }
 
-        return null;
+        return "boolean";// the result of a comparison is always boolean
      
    }
 
@@ -422,6 +444,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "+"
     * f2 -> PrimaryExpression()
     */
+   @Override  
    public String visit(PlusExpression n, AllClasses argu) throws Exception {
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
@@ -457,7 +480,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of + must be of type int");
         }
 
-        return null;
+        return "int";
    }
 
    /**
@@ -465,6 +488,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "-"
     * f2 -> PrimaryExpression()
     */
+   @Override  
    public String visit(MinusExpression n, AllClasses argu) throws Exception {
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this ,argu);
@@ -500,7 +524,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of + must be of type int");
         }
 
-        return null;
+        return "int";
    }
 
    /**
@@ -508,6 +532,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "*"
     * f2 -> PrimaryExpression()
     */
+   @Override  
    public String visit(TimesExpression n, AllClasses argu) throws Exception {
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
@@ -543,13 +568,14 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of + must be of type int");
         }
 
-        return null;
+        return "int";
    }
 
     /**
     * f0 -> "!"
     * f1 -> Clause()
     */
+   @Override  
    public String visit(NotExpression n, AllClasses argu) throws Exception {
        
         String right= n.f1.accept(this, argu);
@@ -571,7 +597,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Both operands of ! must be of type boolean");
         }
 
-        return null;
+        return "boolean";
    }
 
    /**
@@ -579,6 +605,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> Expression()
     * f2 -> ")"
     */
+   @Override  
    public String visit(BracketExpression n, AllClasses argu) throws Exception {
         return n.f1.accept(this, argu);
    }
@@ -591,6 +618,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f1 -> "."
     * f2 -> "length"
     */
+   @Override  
    public String visit(ArrayLength n, AllClasses argu) throws Exception {
         String expr= n.f0.accept(this, argu);
         String type_expr="" ;
@@ -611,7 +639,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("The .lenght operator can only be applied to int[]");
         }
 
-        return null;
+        return "int"; // the result of .length is always an integer
    }
    
    /**
@@ -621,6 +649,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f3 -> Expression()
     * f4 -> "]"
     */
+   @Override  
    public String visit(ArrayAllocationExpression n, AllClasses argu) throws Exception {
         String expr= n.f3.accept(this, argu);
         String type_expr="";
@@ -641,7 +670,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("Array allocation must be have  integer size");
         }
 
-        return null;
+        return "int[]"; //we create an array of integers 
    }
 
    /**
@@ -650,6 +679,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f2 -> PrimaryExpression()
     * f3 -> "]"
     */
+   @Override  
    public String visit(ArrayLookup n, AllClasses argu) throws Exception {
         String myarray= n.f0.accept(this, argu);
         String myindex= n.f2.accept(this, argu);
@@ -685,7 +715,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("TThe index of an array must be of type int and the array must be of type int[]");
         }
 
-        return null;
+        return "int"; // the result of looking up an array is always an integer
    }
 
    /**
@@ -697,6 +727,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     * f5 -> Expression()
     * f6 -> ";"
     */
+   @Override  
    public String visit(ArrayAssignmentStatement n, AllClasses argu) throws Exception {
         
         String myarray= n.f0.accept(this, argu);
@@ -749,12 +780,133 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             throw new Exception("The value assigned to an array element must be of type int");
         }
 
-        return null;
+        return null; // array assignment doesnt produce a value
    }
 
 
 
 
+   /**
+    * f0 -> "new"
+    * f1 -> Identifier()
+    * f2 -> "("
+    * f3 -> ")"
+    */
+   @Override  
+   public String visit(AllocationExpression n, AllClasses argu) throws Exception {
+        //Class name is extracted 
+        String classname= n.f1.accept(this, argu);
+
+        //////////////// ylopoihse to 
+        if(argu.getClassInfoByName(classname) == null) {
+            throw new Exception("Class " + classname + " not found");
+        }
+        
+      return classname;// returning the name if the class as a type
+   }
+
+
+   /**
+    * f0 -> Identifier()
+    * f1 -> "="
+    * f2 -> Expression()
+    * f3 -> ";"
+    */
+   @Override  
+   public String visit(AssignmentStatement n, AllClasses argu) throws Exception {
+        String ident_name= n.f0.accept(this, argu);
+        String expr= n.f2.accept(this ,argu);
+
+        String type_ident="";   
+        String type_expr="";
+
+
+        if(ident_name !=null ){
+            String temp= argu.getTypeVariable(ident_name);
+            type_ident=temp;
+            
+        }
+
+        if(type_ident==null) {
+            throw new Exception("Variable " + ident_name + " not found");
+        }
+
+        if(expr !=null ){
+            String temp= argu.getTypeVariable(expr);
+            if(temp !=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_expr= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_expr=expr;
+            }
+        }
+
+        if(!type_expr.equals(type_ident)) {
+            throw new Exception("The type of the expression assigned to " + ident_name + " doesnt match with the declared type " + type_ident);
+        }
+
+
+        return null;
+   }
+
+
+   /**
+    * f0 -> PrimaryExpression()
+    * f1 -> "."
+    * f2 -> Identifier()
+    * f3 -> "("
+    * f4 -> ( ExpressionList() )?
+    * f5 -> ")"
+    */
+   @Override  
+   public String visit(MessageSend n, AllClasses argu) throws Exception {
+        String object= n.f0.accept(this, argu);
+        String type_object="";
+
+        if(object !=null ){
+            String temp= argu.getTypeVariable(object);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                type_object= temp;
+            }else{
+                //if the variable wasnt found then the right is already the type 
+                type_object=object;
+            }
+        }
+
+        ClassInfo class_info= argu.getClassInfoByName(type_object);
+        if(class_info==null) {
+            throw new Exception("The class  " + object + "was  not found");
+        }      
+
+        String method_name= n.f2.accept(this, argu);
+
+        // We extract the types of the arguments of the method call
+        LinkedList<String> argument_types= new LinkedList<>();
+        if(n.f4.present()) {
+            ExpressionList exprList =  (ExpressionList) n.f4.node;
+
+            String arg_type= exprList.f0.accept(this, argu);
+            argument_types.add(arg_type);
+            for(Node node : exprList.f1.f0.nodes) {
+                ExpressionTerm exprTerm= (ExpressionTerm) node;
+                arg_type= exprTerm.f1.accept(this, argu);
+                argument_types.add(arg_type);
+            }
+        
+        
+        }
+
+        MethodInfo method_info= argu.findMethod(class_info, method_name, argument_types);
+        if(method_info==null) {
+            throw new Exception("Method " + method_name + " with the given argument types was not found in class " + type_object + " or its parent classes");
+        }
+
+        return method_info.getReturnType(); // the type of a method call is the return type of the method
+
+    }
+        
 
 
 }
