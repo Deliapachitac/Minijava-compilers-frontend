@@ -175,8 +175,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
         }
 
-        // n.f7.accept(this, argu); // var declarations of the method
-        
+        //
         if(n.f7.present()) {
             for(syntaxtree.Node node : n.f7.nodes) {
                 VarDeclaration varDecl =(VarDeclaration) node;
