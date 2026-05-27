@@ -162,7 +162,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             argu.addLocalVar(myname, mytype); // add the first parameter to the local variables of the method
 
             // For each
-            for(Node node :paramList.f1.f0.nodes) {
+            for(syntaxtree.Node node :paramList.f1.f0.nodes) {
                 FormalParameterTerm paramTerm = (FormalParameterTerm) node;
                 
                 mytype= paramTerm.f1.f0.accept(this, argu);
@@ -175,7 +175,17 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
         }
 
-        n.f7.accept(this, argu); // var declarations of the method
+        // n.f7.accept(this, argu); // var declarations of the method
+        
+        if(n.f7.present()) {
+            for(syntaxtree.Node node : n.f7.nodes) {
+                VarDeclaration varDecl =(VarDeclaration) node;
+                String var_type= varDecl.f0.accept(this, argu);// gets ex "int", "boolean", "Element", etc.
+                String var_name= varDecl.f1.accept(this, argu);// gets the name of the variable
+                argu.addLocalVar(var_name, var_type); // add the local variable to the local variables of the method
+            }
+        }
+        
         n.f8.accept(this, argu); // this will visit the statements of the method (if,while,print,...)
 
         //Checking the return type of the method
@@ -193,10 +203,21 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             }
         }
 
-        if(!type_return_expr.equals(returnType)) {
-            throw new Exception("The type of the return " + type_return_expr + " doesnt match with the declared return type  " + returnType);
+        
+        // we check if the parameter types match
+        boolean match= type_return_expr.equals(returnType);
+        if(!match) {
+            ClassInfo expected_class= argu.getClassInfoByName(type_return_expr);
+            ClassInfo given_class= argu.getClassInfoByName(returnType);
+            if( argu.isSubClass(given_class, expected_class)&&expected_class!=null && given_class!=null ) {
+                match =true;
+            } 
         }
 
+
+        if(!match) {
+            throw new Exception("The type of the return " + type_return_expr + " is not compatible with the declared return type  " + returnType);
+        }
 
 
         return null;
@@ -521,7 +542,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
 
         if(!type_right.equals("int")|| !type_left.equals("int") ) {
-            throw new Exception("Both operands of + must be of type int");
+            throw new Exception("Both operands of - must be of type int");
         }
 
         return "int";
@@ -883,22 +904,47 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String method_name= n.f2.accept(this, argu);
 
         // We extract the types of the arguments of the method call
-        LinkedList<String> argument_types= new LinkedList<>();
+        LinkedList<String> list_arg_types= new LinkedList<>();
         if(n.f4.present()) {
             ExpressionList exprList =  (ExpressionList) n.f4.node;
 
-            String arg_type= exprList.f0.accept(this, argu);
-            argument_types.add(arg_type);
-            for(Node node : exprList.f1.f0.nodes) {
+            String arg= exprList.f0.accept(this, argu);
+            String arg_type="";
+            if(arg !=null ){
+                String temp= argu.getTypeVariable(arg);
+                if(temp!=null){
+                    // if the variable was found then return their type (ex. Element->int)
+                    arg_type= temp;
+                }else{
+                    //if the variable wasnt found then the right is already the type 
+                    arg_type=arg;
+                }
+            }
+            list_arg_types.add(arg_type);
+            for(syntaxtree.Node node : exprList.f1.f0.nodes) {
+
                 ExpressionTerm exprTerm= (ExpressionTerm) node;
-                arg_type= exprTerm.f1.accept(this, argu);
-                argument_types.add(arg_type);
+                arg= exprTerm.f1.accept(this, argu);
+                arg_type="";
+                if(arg !=null ){
+                    String temp= argu.getTypeVariable(arg);
+                    if(temp!=null){
+                        // if the variable was found then return their type (ex. Element->int)
+                        arg_type= temp;
+                    }else{
+                        //if the variable wasnt found then the right is already the type    
+                        arg_type=arg;   
+                    }
+                }
+                list_arg_types.add(arg_type);
             }
         
         
         }
 
-        MethodInfo method_info= argu.findMethod(class_info, method_name, argument_types);
+        MethodInfo method_info= argu.findMethod(class_info, method_name, list_arg_types);
+        System.out.println(" " + method_info);
+        System.out.println("Type checking method call " + method_name + " on object of type " + type_object + " with argument types " + list_arg_types.toString());
         if(method_info==null) {
             throw new Exception("Method " + method_name + " with the given argument types was not found in class " + type_object + " or its parent classes");
         }

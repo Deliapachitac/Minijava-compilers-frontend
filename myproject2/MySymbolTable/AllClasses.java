@@ -96,14 +96,38 @@ public class AllClasses {
     // if found => returns MethodInfo of the method
     // if not found => returns null
     public MethodInfo findMethod(ClassInfo myclass,String name, LinkedList<String> parameterTypes) {
-        ClassInfo current = currentClass;
+        ClassInfo current = myclass;
         while (current != null) {
             LinkedList<MethodInfo> methodList = current.getMethods().get(name);
             if (methodList != null) {
                 for (MethodInfo m : methodList) {
-                    if (m.getParameterTypes().equals(parameterTypes)) {
+                    if (m.getParameterTypes().size()!= parameterTypes.size()) {
+                        continue;
+                    }
+
+                    boolean match = true;
+                    // we check if the parameter types match
+                    for (int i = 0; i < parameterTypes.size(); i++) {
+                        String expected_type=m.getParameterTypes().get(i);
+                        String given_type= parameterTypes.get(i);
+
+                        // if the types are not the same we check if they are compatible (ex. if the expected type is a parent class of the given type)
+                        if(!given_type.equals(expected_type)) {
+                            ClassInfo expected_class= this.getClassInfoByName(expected_type);
+                            ClassInfo given_class= this.getClassInfoByName(given_type);
+                            if( !this.isSubClass(given_class, expected_class)||expected_class==null || given_class==null ) {
+                                match = false;
+                                break;
+                            } 
+
+                        }
+
+
+                    }
+                    if(match) {
                         return m;
                     }
+
                 }
             }
             current = current.getParentClass();
@@ -111,6 +135,7 @@ public class AllClasses {
         return null; 
     }
 
+    
     
     public void clearLocals(){
         this.localvar.clear();
