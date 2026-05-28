@@ -48,7 +48,7 @@ class Element {
 		    if (!(other.GetMarried())) ret_val = false;
 		    else nt = 0 ;
 		else
-		    if (other.GetMarried()) ret_val = false;
+		    if (!(other.GetMarried())) ret_val = false;
 		    else nt = 0 ;
 	}
 
@@ -105,7 +105,7 @@ class List{
     // Update the the pointer to the next node
     public boolean SetNext(List v_next){
 	next = v_next ;
-	return true ;
+	return 0 ;  //TE
     }
     
     // Delete an element e from the list
