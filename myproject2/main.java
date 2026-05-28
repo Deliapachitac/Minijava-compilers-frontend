@@ -23,19 +23,23 @@ public class main {
                
                 // Create a parser for the input file and parse it to get the root of the syntax tree
                 MiniJavaParser myparser =new  MiniJavaParser(fin);
-                Goal root= myparser.Goal();
+                Goal root= myparser.Goal(); // starting program fromGoal root node
 
-                //build the new symbol table
+                //Initialise the new symbol table
                 AllClasses all_classes = new AllClasses();
                 
+                //Insert  information(class,fields , methods,..) to the symbol table 
                 SymbolTableVisitor root_visitor = new SymbolTableVisitor();
                 root.accept(root_visitor, all_classes);
 
-                all_classes.printOffset();
-
-                //type checking
+               
+                //type checking rules
                 TypeChecking type_checking_visitor = new TypeChecking();
                 root.accept(type_checking_visitor, all_classes);    
+                
+                //If both visitors finished without throwing an exception then print their offsets
+                System.out.println("\n\n" );
+                all_classes.printOffset();
 
                 
 

@@ -1,18 +1,19 @@
 package MySymbolTable;
 import java.util.*;
 
-
+/*This is a class that stores information about all the classes in the program */
 public class AllClasses {
     
     private LinkedHashMap<String, ClassInfo> classes;
-
+    
     // This are helpful variables that are set by visitors to keep track od the current position on the AST  
     private ClassInfo currentClass;
     private LinkedHashMap<String, String>localvar ;
 
+     
     public AllClasses() {
         this.classes = new LinkedHashMap<>();
-        this.localvar = new LinkedHashMap<>();
+        this.localvar =new LinkedHashMap<>();
 
     }
 

@@ -8,7 +8,7 @@ public class MethodInfo {
     private String name;
     private String returnType;
     private LinkedList<String[]> parameters; // list of parameters [type, name]
-    private int offset; 
+    private int offset; // offset of the method in the vtable
 
 
     public MethodInfo(String name, String returnType, int offset) {

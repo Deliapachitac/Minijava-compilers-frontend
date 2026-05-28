@@ -59,13 +59,19 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
 
-        System.out.println("Type checking main class " + classname);
-        
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
         
         // visit var declarations of the main method
-        n.f14.accept(this,argu);
+        if (n.f14.present()) {
+            for (syntaxtree.Node node : n.f14.nodes) {
+                VarDeclaration varDecl =(VarDeclaration) node;
+                String var_type = varDecl.f0.accept(this, argu);
+                String var_name = varDecl.f1.accept(this, argu);
+                argu.addLocalVar(var_name, var_type);
+            }
+        }
+
 
         // visit statements of the main method
         n.f15.accept(this,argu);
@@ -88,7 +94,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
 
-        System.out.println("Type checking class " + classname);
         
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
@@ -120,10 +125,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
-        String parentname= n.f3.accept(this, argu);
-
-        System.out.println("Type checking class " + classname +"extends " + parentname);
-
+       
+        
         argu.setCurrentClass(classname); // set the current class to the class we are visiting  
         argu.clearLocals(); // clear any local variables from previous classes 
         
@@ -168,9 +171,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     public String visit(MethodDeclaration n, AllClasses argu) throws Exception{
        //Method name and return type are extracted  
         String returnType= n.f1.accept(this, argu);
-        String methodname= n.f2.accept(this, argu);
-
-        System.out.println("Type checking method " + methodname + " with return type " + returnType);
+      
         argu.clearLocals(); // clear any local variables from previous methods
         
         
@@ -181,7 +182,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             //We extract the first parameter of the method and save it in the list of parameters of the method
             String mytype= paramList.f0.f0.accept(this, argu);
             String myname= paramList.f0.f1.accept(this, argu);
-            System.out.println("    Parameter: " + mytype + " " + myname);
             argu.addLocalVar(myname, mytype); // add the first parameter to the local variables of the method
 
             // For each
@@ -190,7 +190,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
                 
                 mytype= paramTerm.f1.f0.accept(this, argu);
                 myname= paramTerm.f1.f1.accept(this, argu);
-                System.out.println("    Parameter: " + mytype + " " + myname);
                 argu.addLocalVar(myname, mytype); // add the parameter to the local variables of the method
             }
 
@@ -202,10 +201,10 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         if(n.f7.present()) {
             for(syntaxtree.Node node : n.f7.nodes) {
                 VarDeclaration varDecl =(VarDeclaration) node;
-                String var_type= varDecl.f0.accept(this, argu);// gets ex "int", "boolean", "Element", etc.
+                String var_type= varDecl.f0.accept(this, argu);// ex "int", "boolean", "Element", etc
                 String var_name= varDecl.f1.accept(this, argu);// gets the name of the variable
                 argu.addLocalVar(var_name, var_type); // add the local variable to the local variables of the method
-            }
+            }      
         }
         
         n.f8.accept(this, argu); // this will visit the statements of the method (if,while,print,...)
@@ -241,7 +240,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String raw_type = n.f2.accept(this, argu);
         String type_condition=realType(raw_type, argu);
 
-        System.out.println("Type checking while statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
             throw new Exception("Condition  of while statement must be of type boolean");
         }
@@ -265,7 +263,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String raw_type = n.f2.accept(this, argu);
         String type_condition=realType(raw_type, argu);
 
-        System.out.println("Type checking if statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
             throw new Exception("Condition  of if statement must be of type boolean");
         }
@@ -275,28 +272,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         return null;
    }
 
-
-    /**
-    * f0 -> "System.out.println"
-    * f1 -> "("
-    * f2 -> Expression()
-    * f3 -> ")"
-    * f4 -> ";"
-    */
-   @Override  
-   public String visit(PrintStatement n, AllClasses argu) throws Exception {
-        
-        //We take the result of f2 (ex: "Element", "int")
-        String raw_type = n.f2.accept(this, argu);
-        String type_condition=realType(raw_type, argu);
-
-        System.out.println("Type checking print statement with expression type: " + type_condition);
-        if(!type_condition.equals("int")) {
-            throw new Exception("Println statement only prints integers");
-        }
-
-        return null;
-   }
 
   
     // for identifiers we return the name of the identifier(class name, variable name, method name, etc.)

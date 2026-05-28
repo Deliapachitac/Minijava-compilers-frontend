@@ -9,6 +9,9 @@ compile:
 run:
 	java -cp . main $(FILE)
 
+run_tests:
+	python3 runtests.py
+
 
 clean:
 	rm -rf *.class syntaxtree visitor lib/minijava-jtb.jj *~

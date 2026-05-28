@@ -7,7 +7,7 @@ import visitor.GJDepthFirst;
 
 public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
     
-    private boolean inMethod = false; //this is flag to check if we are currently visiting  a method or not  (ΩαρΔεψλαρατιον is λοψαλ variable or field to the class )
+    private boolean inMethod = false; //this is flag to check if we are currently visiting  a method or not  (to determine if it is a local variable or field to the class )
    
     /**
     * f0 -> "class"

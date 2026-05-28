@@ -20,7 +20,7 @@ public class ClassInfo {
         this.fieldOffset = 0;
         this.methodOffset = 0;
 
-        //the offsets begin where the parent class left off
+        //the offsets begin where the parent class left off if parent class exists 
         if (parentClass != null) {
             this.fieldOffset = parentClass.getFieldOffset();
             this.methodOffset = parentClass.getMethodOffset();
@@ -116,7 +116,7 @@ public class ClassInfo {
         return methodOffset;   
     }   
 
-    //helper function 
+    //helper function to get the offset size
     public int getSize(String type) {
         if (type.equals("int")) {
             return 4;
@@ -127,6 +127,7 @@ public class ClassInfo {
         }
     }
 
+    //This function returns a list of the types of the parameters given
     private LinkedList<String> getTypes(LinkedList<String[]> parameters) {
         
         LinkedList<String> parameterTypes = new LinkedList<>();
