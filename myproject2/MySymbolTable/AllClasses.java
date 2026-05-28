@@ -170,33 +170,46 @@ public class AllClasses {
 
     public void printOffset(){
 
-        boolean first=true;//to skip the first class(main class) that is not printed in the required format
-        for(LinkedHashMap<String, ClassInfo> c : ){
+        Iterator<ClassInfo> iterator = classes.values().iterator();
+        
+        if(iterator.hasNext()){
+           iterator.next();// Skip the first class (main)
+        }
+        
+        while(iterator.hasNext()){
 
-            if(first){
-                System.out.println("Class "+c.getName()+":");
-                first=false;
-                continue;
-            }
-
-            ClassInfo myclassinfo=c.getParentClass();
             
+            ClassInfo myclassinfo=iterator.next();
             System.out.println("-----------Class   "+myclassinfo.getName()+"-----------");
 
             //Fields
             System.out.println("----Variables---");
-            for(LinkedHashMap<String, FieldInfo> f :){
-               FieldInfo fieldinfo=f.getValue();
-               System.out.println(myclassinfo.getName()+" ."+fieldinfo.getName()+": "+fieldinfo.getOffset());
+
+            for(  FieldInfo f : myclassinfo.getFields().values()){
+               
+               System.out.println(myclassinfo.getName()+" ."+f.getName()+": "+f.getOffset());
             
             }
 
             //Methods 
             System.out.println( "---- Methods ---");
-            for(){
-            
-            
-            
+            ClassInfo parentclass=myclassinfo.getParentClass();
+            for(LinkedList<MethodInfo> m : myclassinfo.getMethods().values()){
+                
+                
+                for(MethodInfo methodinfo: m){
+                    boolean override=false;
+                    if( getMethodOverride(parentclass,methodinfo.getName(), methodinfo.getParameterTypes())!=null &&  parentclass!=null){
+                        override=true;
+                    }
+                  
+                  
+                  
+                    if(!override){
+                        System.out.println(myclassinfo.getName()+" ."+methodinfo.getName()+": "+methodinfo.getOffset());
+                    } 
+                } 
+
             
             }
         }

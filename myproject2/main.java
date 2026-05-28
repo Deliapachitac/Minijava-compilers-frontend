@@ -31,6 +31,8 @@ public class main {
                 SymbolTableVisitor root_visitor = new SymbolTableVisitor();
                 root.accept(root_visitor, all_classes);
 
+                all_classes.printOffset();
+
                 //type checking
                 TypeChecking type_checking_visitor = new TypeChecking();
                 root.accept(type_checking_visitor, all_classes);    
