@@ -41,16 +41,40 @@ public class ClassInfo {
         return true;
     }
 
+    // The offset meaning:
     // if offset is -1 it means that the method is new or overloaded
     // if offest>=0 it means that the method is an override and it has the same offset
+    
+    //Overloading rules :
+    // - Same name , different number of args => valid
+    // - Same name, same number of args and same types => NOT valid
+    // - Same name , same number of args and subtype relation(ex. Cat extends Animal) => NOT valid
+    // - Same name, same number of args and at least one position with no subtype relation => valid
     public boolean addMethod(String methodName, String returnType, LinkedList<String[]> parameters,int offest){
        
         LinkedList<MethodInfo> methodList = methods.computeIfAbsent(methodName, k -> new LinkedList<>());
         LinkedList<String> parameterTypes = getTypes(parameters);
         
         for (MethodInfo m: methodList) {
-            if (m.getParameterTypes().equals(parameterTypes)) {
-                return false; // method with same name and parameter types already exists
+            LinkedList<String> existingParamTypes = m.getParameterTypes();
+            if (existingParamTypes.size() == parameterTypes.size()) {
+               
+                boolean match=true;
+
+                for (int i = 0; i <parameterTypes.size(); i++) {
+                    String  type1= existingParamTypes.get(i);
+                    String  type2= parameterTypes.get(i);
+
+                    if(!type1.equals(type2)) {
+                        match=false;
+                    }
+
+                }
+                if(match) {
+                    return false; // method with same name and parameter types already exists
+                }
+
+
             }
         }
 

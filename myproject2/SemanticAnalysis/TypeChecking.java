@@ -9,6 +9,29 @@ import visitor.GJDepthFirst;
 
 public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     
+
+    private String realType(String raw , AllClasses argu){
+        if(raw !=null ){
+            String temp= argu.getTypeVariable(raw);
+            if(temp!=null){
+                // if the variable was found then return their type (ex. Element->int)
+                return temp;
+            }else{
+                //if the variable wasnt found then the raw is already the type 
+                return raw;
+            }
+        }
+        return null;
+    }
+
+    private boolean isCompatible(String expected_type, String given_type, AllClasses argu) {
+        if(expected_type.equals(given_type)) {
+            return true;
+        }
+        ClassInfo expected_class= argu.getClassInfoByName(expected_type);
+        ClassInfo given_class= argu.getClassInfoByName(given_type);
+        return argu.isSubClass(given_class, expected_class);
+    }
     /**
     * f0 -> "class"
     * f1 -> Identifier()
@@ -175,7 +198,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
         }
 
-        //
+        //Re register local variable declarations
         if(n.f7.present()) {
             for(syntaxtree.Node node : n.f7.nodes) {
                 VarDeclaration varDecl =(VarDeclaration) node;
@@ -189,32 +212,12 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
 
         //Checking the return type of the method
         String return_expr_type= n.f10.accept(this, argu);
-        String type_return_expr="";
-
-        if(return_expr_type !=null ){
-            String temp= argu.getTypeVariable(return_expr_type);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_return_expr= temp;
-            }else{
-                //if the variable wasnt found then the return_expr_type is already the type 
-                type_return_expr=return_expr_type;
-            }
-        }
+        String type_return_expr=realType(return_expr_type, argu);
 
         
-        // we check if the parameter types match
-        boolean match= type_return_expr.equals(returnType);
-        if(!match) {
-            ClassInfo expected_class= argu.getClassInfoByName(type_return_expr);
-            ClassInfo given_class= argu.getClassInfoByName(returnType);
-            if( argu.isSubClass(given_class, expected_class)&&expected_class!=null && given_class!=null ) {
-                match =true;
-            } 
-        }
 
 
-        if(!match) {
+        if(!isCompatible(type_return_expr,returnType, argu)) {
             throw new Exception("The type of the return " + type_return_expr + " is not compatible with the declared return type  " + returnType);
         }
 
@@ -236,18 +239,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    public String visit(WhileStatement n, AllClasses argu) throws Exception {
        //We take the result of f2 (ex: "Element", "int")
         String raw_type = n.f2.accept(this, argu);
-        String type_condition="";
-
-        if(raw_type !=null ){
-            String temp= argu.getTypeVariable(raw_type);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_condition= temp;
-            }else{
-                //if the variable wasnt found then the raw_type is already the type 
-                type_condition=raw_type;
-            }
-        }
+        String type_condition=realType(raw_type, argu);
 
         System.out.println("Type checking while statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
@@ -271,19 +263,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    public String visit(IfStatement n, AllClasses argu) throws Exception {
         //We take the result of f2 (ex: "Element", "int")
         String raw_type = n.f2.accept(this, argu);
-        String type_condition="";
-
-      
-        if(raw_type !=null ){
-            String temp= argu.getTypeVariable(raw_type);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_condition= temp;
-            }else{
-                //if the variable wasnt found then the raw_type is already the type 
-                type_condition=raw_type;
-            }
-        }
+        String type_condition=realType(raw_type, argu);
 
         System.out.println("Type checking if statement with condition type: " + type_condition);
         if(!type_condition.equals("boolean")) {
@@ -308,18 +288,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         
         //We take the result of f2 (ex: "Element", "int")
         String raw_type = n.f2.accept(this, argu);
-        String type_condition="";
-
-        if(raw_type !=null ){
-            String temp= argu.getTypeVariable(raw_type);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_condition= temp;
-            }else{
-                //if the variable wasnt found then the raw_type is already the type 
-                type_condition=raw_type;
-            }
-        }
+        String type_condition=realType(raw_type, argu);
 
         System.out.println("Type checking print statement with expression type: " + type_condition);
         if(!type_condition.equals("int")) {
@@ -380,31 +349,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
 
-        String type_left="";
-        String type_right="";
-
-
-        if(left !=null ){
-            String temp= argu.getTypeVariable(left);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_left= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_left=left;
-            }
-        }
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
+        String type_left=realType(left, argu);
+        String type_right=realType(right, argu);
 
 
         if(!type_right.equals("boolean") || !type_left.equals("boolean") ) {
@@ -424,32 +370,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
 
-        String type_left="";
-        String type_right="";
-
-
-        if(left !=null ){
-            String temp= argu.getTypeVariable(left);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_left= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_left=left;
-            }
-        }
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
-
+        String type_left=realType(left, argu);
+        String type_right=realType(right, argu);
 
         if(!type_right.equals("int") || !type_left.equals("int") ) {
             throw new Exception("Both operands of < must be of type int");
@@ -469,31 +391,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
 
-        String type_left="";
-        String type_right="";
-
-
-        if(left !=null ){
-            String temp= argu.getTypeVariable(left);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_left= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_left=left;
-            }
-        }
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
+        String type_left=realType(left, argu);
+        String type_right=realType(right, argu);
 
 
         if(!type_right.equals("int") || !type_left.equals("int") ) {
@@ -513,32 +412,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this ,argu);
 
-        String type_left="";   
-        String type_right="";
-
-
-        if(left !=null ){
-            String temp= argu.getTypeVariable(left);
-            if(temp!= null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_left= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_left=left;
-            }
-        }
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp !=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
-
+        String type_left=realType(left, argu);   
+        String type_right=realType(right, argu);
 
         if(!type_right.equals("int")|| !type_left.equals("int") ) {
             throw new Exception("Both operands of - must be of type int");
@@ -557,35 +432,12 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String left= n.f0.accept(this, argu);
         String right= n.f2.accept(this, argu);
 
-        String type_left="";
-        String type_right="";
-
-
-        if(left !=null ){
-            String temp= argu.getTypeVariable(left);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_left= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_left=left;
-            }
-        }
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
+        String type_left=realType(left, argu);
+        String type_right= realType(right, argu);
 
 
         if(!type_right.equals("int") || !type_left.equals("int") ) {
-            throw new Exception("Both operands of + must be of type int");
+            throw new Exception("Both operands of * must be of type int");
         }
 
         return "int";
@@ -599,18 +451,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    public String visit(NotExpression n, AllClasses argu) throws Exception {
        
         String right= n.f1.accept(this, argu);
-        String type_right="";
-
-        if(right !=null ){
-            String temp= argu.getTypeVariable(right);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_right= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_right=right;
-            }
-        }
+        String type_right=realType(right, argu);
 
 
         if(!type_right.equals("boolean")  ) {
@@ -641,18 +482,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    @Override  
    public String visit(ArrayLength n, AllClasses argu) throws Exception {
         String expr= n.f0.accept(this, argu);
-        String type_expr="" ;
-
-        if(expr !=null ){
-            String temp= argu.getTypeVariable(expr);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_expr= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_expr=expr;
-            }
-        }
+        String type_expr=realType(expr, argu);
 
 
         if(!type_expr.equals("int[]")  ) {
@@ -672,18 +502,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    @Override  
    public String visit(ArrayAllocationExpression n, AllClasses argu) throws Exception {
         String expr= n.f3.accept(this, argu);
-        String type_expr="";
-
-        if(expr !=null ){
-            String temp= argu.getTypeVariable(expr);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_expr= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_expr=expr;
-            }
-        }
+        String type_expr=realType(expr, argu);
 
 
         if(!type_expr.equals("int")  ) {
@@ -704,31 +523,8 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String myarray= n.f0.accept(this, argu);
         String myindex= n.f2.accept(this, argu);
 
-        String type_array="";
-        String type_index="";
-
-
-        if(myarray !=null ){
-            String temp= argu.getTypeVariable(myarray);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_array= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_array=myarray;
-            }
-        }
-
-        if(myindex !=null ){
-            String temp= argu.getTypeVariable(myindex);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_index= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_index=myindex;
-            }
-        }
+        String type_array=realType(myarray, argu);
+        String type_index=realType(myindex, argu);
 
 
         if(!type_index.equals("int") || !type_array.equals("int[]") ) {
@@ -755,43 +551,11 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         String myvalue = n.f5.accept(this, argu);
 
 
-        String type_array="";
-        String type_index="";
-        String type_value="";
+        String type_array=realType(myarray, argu);
+        String type_index=realType(myindex, argu);
+        String type_value = realType(myvalue, argu);
 
-        if(myarray !=null ){
-            String temp= argu.getTypeVariable(myarray);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_array= temp;
-            }else{
-                //if the variable wasnt found then the left is already the type 
-                type_array=myarray;
-            }
-        }
-
-        if(myindex !=null ){
-            String temp= argu.getTypeVariable(myindex);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_index= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_index=myindex;
-            }
-        }
-
-        if(myvalue !=null ){
-            String temp= argu.getTypeVariable(myvalue);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_value= temp;
-            } else{
-                //if the variable wasnt found then the right is already the type 
-                type_value=myvalue;
-            }
-        }
-
+        
         if(!type_index.equals("int") || !type_array.equals("int[]")) {
             throw new Exception("TThe index of an array must be of type int and the array must be of type int[]");
         }
@@ -817,7 +581,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         //Class name is extracted 
         String classname= n.f1.accept(this, argu);
 
-        //////////////// ylopoihse to 
+
         if(argu.getClassInfoByName(classname) == null) {
             throw new Exception("Class " + classname + " not found");
         }
@@ -834,35 +598,20 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
     */
    @Override  
    public String visit(AssignmentStatement n, AllClasses argu) throws Exception {
-        String ident_name= n.f0.accept(this, argu);
-        String expr= n.f2.accept(this ,argu);
-
-        String type_ident="";   
-        String type_expr="";
-
-
-        if(ident_name !=null ){
-            String temp= argu.getTypeVariable(ident_name);
-            type_ident=temp;
-            
-        }
+        
+    String ident_name= n.f0.accept(this, argu);
+        String type_ident= argu.getTypeVariable(ident_name)  ;
+        
 
         if(type_ident==null) {
             throw new Exception("Variable " + ident_name + " not found");
         }
 
-        if(expr !=null ){
-            String temp= argu.getTypeVariable(expr);
-            if(temp !=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_expr= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_expr=expr;
-            }
-        }
+        String expr= n.f2.accept(this ,argu);
+        String type_expr=realType(expr, argu);
 
-        if(!type_expr.equals(type_ident)) {
+        
+        if(!isCompatible(type_ident, type_expr, argu)) {
             throw new Exception("The type of the expression assigned to " + ident_name + " doesnt match with the declared type " + type_ident);
         }
 
@@ -882,18 +631,7 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
    @Override  
    public String visit(MessageSend n, AllClasses argu) throws Exception {
         String object= n.f0.accept(this, argu);
-        String type_object="";
-
-        if(object !=null ){
-            String temp= argu.getTypeVariable(object);
-            if(temp!=null){
-                // if the variable was found then return their type (ex. Element->int)
-                type_object= temp;
-            }else{
-                //if the variable wasnt found then the right is already the type 
-                type_object=object;
-            }
-        }
+        String type_object=realType(object, argu);
 
         ClassInfo class_info= argu.getClassInfoByName(type_object);
         if(class_info==null) {
@@ -908,33 +646,16 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
             ExpressionList exprList =  (ExpressionList) n.f4.node;
 
             String arg= exprList.f0.accept(this, argu);
-            String arg_type="";
-            if(arg !=null ){
-                String temp= argu.getTypeVariable(arg);
-                if(temp!=null){
-                    // if the variable was found then return their type (ex. Element->int)
-                    arg_type= temp;
-                }else{
-                    //if the variable wasnt found then the right is already the type 
-                    arg_type=arg;
-                }
-            }
+            String arg_type=realType(arg, argu);
+
             list_arg_types.add(arg_type);
+
             for(syntaxtree.Node node : exprList.f1.f0.nodes) {
 
                 ExpressionTerm exprTerm= (ExpressionTerm) node;
                 arg= exprTerm.f1.accept(this, argu);
-                arg_type="";
-                if(arg !=null ){
-                    String temp= argu.getTypeVariable(arg);
-                    if(temp!=null){
-                        // if the variable was found then return their type (ex. Element->int)
-                        arg_type= temp;
-                    }else{
-                        //if the variable wasnt found then the right is already the type    
-                        arg_type=arg;   
-                    }
-                }
+                arg_type=realType(arg, argu);
+                
                 list_arg_types.add(arg_type);
             }
         
@@ -942,8 +663,6 @@ public class TypeChecking extends  GJDepthFirst<String,AllClasses>{
         }
 
         MethodInfo method_info= argu.findMethod(class_info, method_name, list_arg_types);
-        System.out.println(" " + method_info);
-        System.out.println("Type checking method call " + method_name + " on object of type " + type_object + " with argument types " + list_arg_types.toString());
         if(method_info==null) {
             throw new Exception("Method " + method_name + " with the given argument types was not found in class " + type_object + " or its parent classes");
         }

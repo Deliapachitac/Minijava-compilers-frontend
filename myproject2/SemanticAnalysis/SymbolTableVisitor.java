@@ -219,11 +219,19 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         }
 
         /////////////////////////???? not sure yet 
-        MethodInfo parentmethod = argu.findMethod(argu.getCurrentClass().getParentClass(), methodname, paramTypes);
+        ClassInfo parentclass = argu.getCurrentClass().getParentClass();
+        MethodInfo overriddenMethod = argu.getMethodOverride(parentclass, methodname, paramTypes);
+        
         int myoffset;
-        if(parentmethod!=null) {
-            myoffset = parentmethod.getOffset();
+        if(overriddenMethod!=null) {
+            //same name same parameter types in a parent class 
+            if(!overriddenMethod.getReturnType().equals(returnType)) {
+                throw new Exception("Invalid method override: return type does not match overridden method");
+            }
+            myoffset = overriddenMethod.getOffset();
         }else {
+            //New method or new valid overload
+            checkOverloadConflict( methodname, argu,paramTypes);
             myoffset = -1;
         }
 
@@ -249,6 +257,105 @@ public class SymbolTableVisitor extends  GJDepthFirst<String,AllClasses>{
         inMethod = false;
         return null;
     }
+
+    private void checkOverloadConflict(String methodname,AllClasses argu,  LinkedList<String> paramTypes) throws Exception {
+ 
+        //check for overload conflicts in the current class 
+        LinkedList<MethodInfo> currentMethodList =argu.getCurrentClass().getMethods().get(methodname);
+        if (currentMethodList != null) {
+            for (MethodInfo m : currentMethodList) {
+                LinkedList<String> currentparamTypes = m.getParameterTypes();
+ 
+                // If the number of parameters is different there is no conflict
+                if (currentparamTypes.size() != paramTypes.size()) {
+                    continue;
+                }
+
+                // now check if one of t he parameter types is a parent class of the other parameter type (for all parameters)
+                // if there is then there is a conflict
+                boolean conflict = true;
+                for (int i = 0; i < paramTypes.size(); i++) {
+                    String typeA =currentparamTypes.get(i);
+                    String typeB= paramTypes.get(i);
+
+                    if (typeA.equals(typeB)) {
+                        continue; // exact match is fine, check next parameter
+                    }
+
+                    ClassInfo classA = argu.getClassInfoByName(typeA);
+                    ClassInfo classB = argu.getClassInfoByName(typeB);
+
+                    //if there are no classes => no subtype relation => no conflict
+                    if (classA == null || classB == null) {
+                        conflict = false;
+                        break;
+                    }
+
+                    // Check subtype in both direction
+                    if (!(argu.isSubClass(classA, classB) || argu.isSubClass(classB, classA))) {
+                        conflict = false;
+                        break;
+                    }
+                }
+
+                if (conflict) {
+                    throw new Exception("Overloading error: method '" + methodname);
+                }
+            }
+        }
+
+        //also we check for overload conflicts in the parent classes
+        ClassInfo current = argu.getCurrentClass().getParentClass();
+        while(current != null) {
+            LinkedList<MethodInfo> methodList = current.getMethods().get(methodname);
+            if (methodList != null) {
+                for (MethodInfo m : methodList) {
+                    LinkedList<String> currentparamTypes = m.getParameterTypes();
+ 
+                    // If the number of parameters is different there is no conflict
+                    if (currentparamTypes.size() != paramTypes.size()) {
+                        continue;
+                    }
+ 
+                    // now check if one of t he parameter types is a parent class of the other parameter type (for all parameters)
+                    // if there is then there is a conflict
+                    boolean conflict = true;
+                    for (int i = 0; i < paramTypes.size(); i++) {
+                        String typeA =currentparamTypes.get(i);
+                        String typeB= paramTypes.get(i);
+ 
+                        if (typeA.equals(typeB)) {
+                            continue; // exact match is fine, check next parameter
+                        }
+ 
+                        ClassInfo classA = argu.getClassInfoByName(typeA);
+                        ClassInfo classB = argu.getClassInfoByName(typeB);
+ 
+                        //if there are no classes => no subtype relation => no conflict
+                        if (classA == null || classB == null) {
+                            conflict = false;
+                            break;
+                        }
+ 
+                        // Check subtype in both direction
+                        if (!(argu.isSubClass(classA, classB) || argu.isSubClass(classB, classA))) {
+                            conflict = false;
+                            break;
+                        }
+                    }
+ 
+                    if (conflict) {
+                        throw new Exception("Overloading error: method '" + methodname);
+                    }
+                }
+            }
+            current = current.getParentClass();
+        }
+ 
+        
+    }
+ 
+
 
    // for identifiers we return the name of the identifier(class name, variable name, method name, etc.)
     @Override

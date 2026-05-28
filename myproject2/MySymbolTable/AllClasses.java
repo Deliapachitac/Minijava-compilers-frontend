@@ -59,6 +59,11 @@ public class AllClasses {
     //true=> if myclass is a subclass of parentclass
     //false=> if myclass is not a subclass of parentclass
     public boolean isSubClass(ClassInfo myclass, ClassInfo parentclass) {
+        
+        if (myclass == null || parentclass == null) {
+            return false;
+        }
+
         if(myclass.equals(parentclass)){
             return true;
         }          
@@ -115,7 +120,7 @@ public class AllClasses {
                         if(!given_type.equals(expected_type)) {
                             ClassInfo expected_class= this.getClassInfoByName(expected_type);
                             ClassInfo given_class= this.getClassInfoByName(given_type);
-                            if( !this.isSubClass(given_class, expected_class)||expected_class==null || given_class==null ) {
+                            if( !this.isSubClass(given_class, expected_class)) {
                                 match = false;
                                 break;
                             } 
@@ -144,5 +149,64 @@ public class AllClasses {
     public ClassInfo getClassInfoByName(String name) {
         return this.classes.get(name);
     }
+
+    // This is a helper function for override 
+    //it returns the method with the same name and parameter types in the parent classes if it exists, and null otherwise
+    public MethodInfo getMethodOverride(ClassInfo myclass,String name, LinkedList<String> parameterTypes){
+        ClassInfo current =myclass ;
+        while (current != null) {
+            LinkedList<MethodInfo> methodList = current.getMethods().get(name);
+            if (methodList != null) {
+                for (MethodInfo m : methodList) {
+                    if(  m.getParameterTypes().equals(parameterTypes)){
+                        return m;
+                    }
+                }
+            }
+            current = current.getParentClass();
+        }
+        return null;
+    }
+
+    public void printOffset(){
+
+        boolean first=true;//to skip the first class(main class) that is not printed in the required format
+        for(LinkedHashMap<String, ClassInfo> c : ){
+
+            if(first){
+                System.out.println("Class "+c.getName()+":");
+                first=false;
+                continue;
+            }
+
+            ClassInfo myclassinfo=c.getParentClass();
+            
+            System.out.println("-----------Class   "+myclassinfo.getName()+"-----------");
+
+            //Fields
+            System.out.println("----Variables---");
+            for(LinkedHashMap<String, FieldInfo> f :){
+               FieldInfo fieldinfo=f.getValue();
+               System.out.println(myclassinfo.getName()+" ."+fieldinfo.getName()+": "+fieldinfo.getOffset());
+            
+            }
+
+            //Methods 
+            System.out.println( "---- Methods ---");
+            for(){
+            
+            
+            
+            
+            }
+        }
+
+
+
+
+
+    }
+
+
 
 }
