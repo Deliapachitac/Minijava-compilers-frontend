@@ -1,22 +1,33 @@
-# Compilers-Project2
-Name: DELIA-MARIA          
-Surname: PACHITAC           
-AM: 1115202200125
+# MiniJava Semantic Analyzer & Type Checker
 
-## How to run the program 
-- cd myproject2
-- make compile (to compile the program)
-- make run_tests (runs a all the tests from the tests folder )  
-- make run FILE= "namefile"  (if you want to run a specific test)
-- make clean 
+A static analyzer and type checker compiler frontend for **MiniJava** (a subset of Java) implemented in Java using **JavaCC** and **JTB (Java Tree Builder)** .The compiler executes a two-pass semantic analysis over the Abstract Syntax Tree (AST) to construct symbol tables, enforce type safety, support method overloading/overriding and compute field and Virtual Method Table (VTable) memory offsets
+
+---
+
+## Technical Overview
+
+* **Lexical & Syntactic Analysis:** Tokenizes and parses source files into an AST using JavaCC and JTB.
+* **Pass 1 (`SymbolTableVisitor`):** Traverses the AST to extract symbol declarations (classes, fields, methods, parameters) and build the hierarchical Symbol Table structure.
+* **Pass 2 (`TypeChecking`):** Re-traverses the AST to enforce type-safety rules, inheritance rules, variable scoping, and method signature validity.
+* **Memory Layout & Offsets:** Calculates physical memory byte offsets for class fields and maps Virtual Method Tables (VTables) for polymorphic method invocation.
+
+---
+
+## Compilation & Testing
+```bash
+make compile #to compile the program
+make run_tests #runs all the tests from the tests folder 
+make run FILE= "path/to/file.java"  #if you want to run a specific test
+make clean 
+```
 
 ## Implementation 
 
 ### Symbol Table 
-A symbol table is a data structure used by a compiler to store information found in the source program.During the first pass over the syntax tree, the compiler completes the symbol table with declarations.I seperated the symbol table implementation in 4 files:
+A symbol table is a data structure used by a compiler to store information found in the source program.During the first pass over the syntax tree, the compiler completes the symbol table with declarations.I separated the symbol table implementation in 4 files:
 
 - **FieldInfo.java** 
-This class stores all the information about a single field (variable,arguments,..) of a class.For every field we will the name, type  and its memory offset. The offset is calculated at the time the field is inserted in the symbol table and it follows this rules:
+This class stores all the information about a single field (variable,arguments,..) of a class.For every field we store the name, type  and its memory offset. The offset is calculated at the time the field is inserted in the symbol table and it follows this rules:
   - `int`=> 4 bytes
   - `boolean` => 1 byte
   - every pointer (class reference or`int[]`) => 8 bytes
@@ -28,7 +39,7 @@ Here we store  all the information about a method. For every method we are going
 Stores all the information about a single class. It holds the class name and the parent ClassInfo (or `null` if there is no parent class).Also we created  a`LinkedHashMap` that keeps each field  of the class   and a `LinkedHashMap` that maps each method name to a `LinkedList<MethodInfo>` because overloaded methods share the same name. Lastly we have the field offset and method offset so that each new field or method is assigned the next available slot. 
 
 - **AllClasses.java** 
-This class is the most important one because it acts as the top-level symbol table that contains information about all the classes in the program. It stores a `LinkedHashMap classes` of all registered `ClassInfo` objects. We also created a variable `currentClass` (`ClassInfo`) that keeps track of the active class the visitor is currently walking through . Lastly the `LinkedHashMap localvar` is mapping the local variables andd method parametres to their types . Local variables are temporary and they exist only inside their method block. Every time the visitor enters a new method it calls clearLocals() on this map and  then it  fills up the  map with the new  local variables and parametres.These are some of the key functions that this implementation provides:
+This class is the most important one because it acts as the top-level symbol table that contains information about all the classes in the program. It stores a `LinkedHashMap classes` of all registered `ClassInfo` objects. We also created a variable `currentClass` (`ClassInfo`) that keeps track of the active class the visitor is currently walking through . Lastly the `LinkedHashMap localvar` is mapping the local variables andd method parameters to their types . Local variables are temporary and they exist only inside their method block. Every time the visitor enters a new method it calls clearLocals() on this map and  then it  fills up the  map with the new  local variables and parameters.These are some of the key functions that this implementation provides:
     - `isSubClass` : Checks if one class is a child of another by searching all the tree
     - `getTypeVariable`: Looks for the variable type (first inside the  local method then in the class fields and lastly in the parent classes if they exist)
     - `findMethod`: Finds a method in the class or the parent class
@@ -36,7 +47,7 @@ This class is the most important one because it acts as the top-level symbol tab
     -`printOffset` :It loops through all variables and methods and prints their byte size offsets that we saved in the class
 
 ### Visitors 
-In our project the JTB tool reads the given MiniJava grammar and automatically generates a bunch of simple Java classes. Each class represents a piece of the code structure (ex: MethodDeclaration, VarDeclaration,...). Instead of putting complicated compiler logic inside these  fileswe keep them clean and write our compiler logic in separate visitor class 
+The JTB tool reads the given MiniJava grammar and automatically generates a bunch of simple Java classes. Each class represents a piece of the code structure (ex: MethodDeclaration, VarDeclaration,...). Instead of putting complicated compiler logic inside these  files  we keep them clean and write our compiler logic in separate visitor class 
 
 - **SymbolVisitorTable.java** 
 This visitor is responsible for doing the first scan over the source code to build our  Symbol Table. Its main job is to collect the names and types of every class, field, method, and parameter it encounters.I wrote comments in detail explaining what each function does . This visitor also handles 2 important concepts: 
@@ -45,7 +56,7 @@ This visitor is responsible for doing the first scan over the source code to bui
     - ` Method overriding` : This occurs when a child class gives a new body to a method it inherited from its parent class. For this to work  the method in the child class has to be an exact copy of the parent's method (name ,return type and arguments). For example if we have a  class called Machine with a method sound() a subclass like Truck can override the general sound.We implemented this by letting the overridden method reuse the exact same slot in the Virtual Method Table that was already allocated by the parent class.
 
 - **TypeChecking.java** 
-This visitor is responsible for executing the second pass of the semantic analyzer. Once the SymbolTableVisitor has built theSymbol table then the TypeChecking pass walks through every  expression  to ensure that it  obeys  type safety and structural constraints.This are some of the conditions that we check 
+This visitor is responsible for executing the second pass of the semantic analyzer. Once the SymbolTableVisitor has built theSymbol table then the TypeChecking pass walks through every  expression  to ensure that it  obeys  type safety and structural constraints.These are some of the conditions that we check 
     - Validate types in arithmetic operations (+, -, * ) => Enforces that both operands are ` int`
     - Validate type in comparisons operations(<) => Enforces that both operands are ` int` 
     - Validate type in logical operations(&&,!)=>Enforces that both operands are ` boolean` 
@@ -71,8 +82,6 @@ Methods do not occupy data space inside a class  instead they are tracked via a 
     * Overridden Methods: When a subclass redefines an inherited parent method signature it reuses the exact same slot index previously allocated by the parent.
 
 ### Project architecture 
-For this project I followed the structure of the example project given in the lectures:
-https://cgi.di.uoa.gr/~compilers/24_25/tutorials-material/jtb-javacc-2025.zip
 
 1. **Lexical and Syntactic Analysis (JavaCC)**: Converts the raw source text stream into tokens and verifies grammatical structural 
 2. **Abstract Syntax Tree Generation (JTB)**: Transforms the token stream into an object-oriented syntax tree structure 
